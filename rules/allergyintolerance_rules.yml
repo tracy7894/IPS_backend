@@ -1,0 +1,52 @@
+# --- IG 設定（參考 IPS） ---
+ig:
+  profiles:
+    patient: "https://twcore.mohw.gov.tw/ig/twcore/StructureDefinition/Patient-twcore"
+    allergyintolerance: "http://hl7.org/fhir/StructureDefinition/AllergyIntolerance"
+
+# --- 來源路由（把原始資料哪一段 → AllergyIntolerance） ---
+type_router:
+  - source: "$.過敏清單[*]"
+    make: "AllergyIntolerance"
+    fields:
+      clinicalStatus:
+        coding:
+          - system: "http://terminology.hl7.org/CodeSystem/allergyintolerance-clinical"
+            code: "$.臨床狀態"
+       # text: "$.臨床狀態"  # 同時提供 text 作為人類可讀的備份
+      #verificationStatus:
+       # coding:
+        #  - system: "http://terminology.hl7.org/CodeSystem/allergyintolerance-verification"
+         #   code: "$.確認狀態"
+        #text: "$.確認狀態"
+      type: "$.類型" 
+      # code: "$.類型"            # allergy 或 intolerance
+      code:
+        coding:
+          - system: "http://snomed.info/sct"
+            code: "$.過敏原.代碼"
+            display: "$.過敏原.名稱"
+      patient:
+        reference: "$.病患.姓名"
+        display: "$.病患.姓名"
+
+      # onset[x] 擇一可用；這邊用 onsetDateTime 若來源有提供
+      # 因為 IPS 的 onset[x] 是 0..1, 可選型別之一
+      onsetDateTime: "$.發生時間"
+
+      reaction:
+        - manifestation:
+            - coding:
+                - system: "http://snomed.info/sct"
+                  code: "$.過敏反應.症狀.代碼"
+                  display: "$.過敏反應.症狀.名稱"
+          severity: "$.過敏反應.嚴重程度"
+           #  coding: 
+            #    - system: "http://hl7.org/fhir/uv/ips/ValueSet/reaction-event-severity"
+             #     code:    # mild / moderate / severe
+
+# --- 輸出分組（決定要 output 哪些資源） ---
+output_groups:
+  - name: "過敏資源"
+    filename: "allergyintolerance.flash"
+    resources: ["AllergyIntolerance"]

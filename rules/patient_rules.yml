@@ -1,0 +1,98 @@
+# --- IG 設定（參考用） ---
+ig:
+profiles:
+patient: "https://twcore.mohw.gov.tw/ig/twcore/StructureDefinition/Patient-twcore"
+
+# --- 來源路由（把原始資料的哪一段，做成哪種 FHIR 資源） ---
+
+
+type_router:
+  # 病患資料 → Patient
+  - source: "$.病患清單[*]"
+    make: "Patient"
+    fields:
+      identifier:
+        - system: "urn:oid:1.2.886.4.6.1.1.999"
+          value: "$.身分證號"
+      name:
+        - use: "official"   # TW Core IG 規定必填
+          text: "$.姓名"
+          family: "$.姓"
+          given: "$.名"
+      gender: "$.性別"
+      birthDate: "$.出生日期"
+
+      # 📞 聯絡資訊 (telecom)
+      telecom:
+        - system: "$.聯絡方式.系統"
+          value: "$.聯絡方式.值"
+          use: "$.聯絡方式.用途"
+          rank: "$.聯絡方式.排序"
+
+      # 🏠 地址
+      address:
+        - use: "home"
+          type: "both"
+          country: "$.地址.國家"
+          line: "$.地址.詳細"
+          city: "$.地址.縣市"
+          district: "$.地址.鄉鎮區"   # TW Core 必填
+          text: "待後端處理"
+          postalCode: "$.地址.郵遞區號"
+
+      # ⚙️ 其他狀態
+      active: "$.是否有效"
+      maritalStatus: "$.婚姻狀態"
+      deceasedBoolean: "$.是否死亡"
+      deceasedDateTime: "$.死亡日期"
+
+      # 🚨 緊急聯絡人
+      contact:
+        - relationship:
+          - coding:
+            - system: "http://terminology.hl7.org/CodeSystem/v2-0131"
+              code: "$.緊急聯絡人.關係"        
+          name:
+            use: "official"
+            text: "$.緊急聯絡人.姓名"
+            family: "$.緊急聯絡人.姓"
+            given: "$.緊急聯絡人.名"
+          telecom:
+            - system: "$.緊急聯絡人.聯絡方式.系統"
+              value: "$.緊急聯絡人.聯絡方式.值"
+              use: "$.緊急聯絡人.聯絡方式.用途"
+          address:
+            use: "home"
+            type: "both"
+            country: "$.緊急聯絡人.地址.國家"
+            line: "$.緊急聯絡人.地址.詳細"
+            city: "$.緊急聯絡人.地址.縣市"
+            district: "$.緊急聯絡人.地址.鄉鎮區"   # TW Core 必填
+            postalCode: "$.緊急聯絡人.地址.郵遞區號"
+          gender: "$.緊急聯絡人.性別"
+          organization: "$.緊急聯絡人.所屬單位"
+ # 🗣️ 語言與溝通偏好
+      communication:
+        - language:
+            coding:
+              - system: "urn:ietf:bcp:47"
+                code: "$.語言.代碼"
+                display: "$.語言.名稱"
+
+      # 🏥 管理機構. 確認
+      managingOrganization:
+        reference: "Organization/$.所屬機構.id"
+        display: "$.所屬機構.名稱"
+
+      # 🖼️ 照片
+      photo:
+        - contentType: "$.照片.格式"
+          url: "$.照片.url"
+          title: "$.照片.說明"
+          creation: "$.照片.建立日期"
+
+# --- 輸出分組（決定產出幾個 FLASH 檔） ---
+output_groups:
+  - name: "基礎資源"
+    filename: "foundation.flash"
+    resources: ["Patient"]
