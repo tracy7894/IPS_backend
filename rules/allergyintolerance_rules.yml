@@ -13,6 +13,7 @@ type_router:
         coding:
           - system: "http://terminology.hl7.org/CodeSystem/allergyintolerance-clinical"
             code: "$.臨床狀態"
+            display: "$.臨床狀態"
         text: "$.臨床狀態"  # 人類可讀的備份
       #verificationStatus:
        # coding:
@@ -27,7 +28,7 @@ type_router:
             code: "$.過敏原.代碼"
             display: "$.過敏原.名稱"
       patient:
-        reference: "$.病患.姓名"
+        reference: "$.病患.姓名" #改身份證
         display: "$.病患.姓名"
 
       # onset[x] 擇一可用；這邊用 onsetDateTime 若來源有提供
