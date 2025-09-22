@@ -46,7 +46,7 @@ type_router:
       deceasedBoolean: "$.是否死亡"
       deceasedDateTime: "$.死亡日期"
 
-      # 🚨 緊急聯絡人
+      # 🚨 緊急聯絡人 可刪
       contact:
         - relationship:
           - coding:
@@ -71,7 +71,7 @@ type_router:
             postalCode: "$.緊急聯絡人.地址.郵遞區號"
           gender: "$.緊急聯絡人.性別"
           organization: "$.緊急聯絡人.所屬單位"
- # 🗣️ 語言與溝通偏好
+ # 🗣️ 語言與溝通偏好 可刪
       communication:
         - language:
             coding:

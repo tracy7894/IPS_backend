@@ -4,6 +4,7 @@ require('dotenv').config();
 const patientRoutes = require('./routes/patient.routes');
 const allergyRoutes = require('./routes/allergy.routes');
 const IPSRoutes=require('./routes/IPS.routes')
+const conditionRoutes=require('./routes/condition.routes')
 const app = express();
 app.use(express.json());
 
@@ -11,4 +12,5 @@ app.use(express.json());
 app.use('/patient', patientRoutes);
 app.use('/allergy', allergyRoutes);
 app.use('/IPS',IPSRoutes)
+app.use('/condition',conditionRoutes)
 module.exports = app;

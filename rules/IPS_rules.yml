@@ -6,6 +6,7 @@ ig:
     #patient: "http://hl7.org/fhir/uv/ips/StructureDefinition/Patient-ips"
     #allergyintolerance: "http://hl7.org/fhir/StructureDefinition/AllergyIntolerance"
     allergyintolerance: "http://hl7.org/fhir/uv/ips/StructureDefinition/AllergyIntolerance-uv-ips"
+    condition: "http://hl7.org/fhir/uv/ips/StructureDefinition/Condition-uv-ips"
 # --- 來源路由 ---
 type_router:
   # Patient 來源現在指向陣列，工具可以正常處理了
@@ -43,55 +44,55 @@ type_router:
 
       # ⚙️ 其他狀態
       active: "$.是否有效"
-      maritalStatus: "$.婚姻狀態"
-      deceasedBoolean: "$.是否死亡"
-      deceasedDateTime: "$.死亡日期"
+     # maritalStatus: "$.婚姻狀態"
+      #deceasedBoolean: "$.是否死亡"
+      #deceasedDateTime: "$.死亡日期"
 
-      # 🚨 緊急聯絡人
-      contact:
-        - relationship:
-          - coding:
-            - system: "http://terminology.hl7.org/CodeSystem/v2-0131"
-              code: "$.緊急聯絡人.關係"        
-          name:
-            use: "official"
-            text: "$.緊急聯絡人.姓名"
-            family: "$.緊急聯絡人.姓"
-            given: "$.緊急聯絡人.名"
-          telecom:
-            - system: "$.緊急聯絡人.聯絡方式.系統"
-              value: "$.緊急聯絡人.聯絡方式.值"
-              use: "$.緊急聯絡人.聯絡方式.用途"
-          address:
-            use: "home"
-            type: "both"
-            country: "$.緊急聯絡人.地址.國家"
-            line: "$.緊急聯絡人.地址.詳細"
-            city: "$.緊急聯絡人.地址.縣市"
-            district: "$.緊急聯絡人.地址.鄉鎮區"   # TW Core 必填
-            postalCode: "$.緊急聯絡人.地址.郵遞區號"
-          gender: "$.緊急聯絡人.性別"
-          organization: "$.緊急聯絡人.所屬單位"
- # 🗣️ 語言與溝通偏好
-      communication:
-        - language:
-            coding:
-              - system: "urn:ietf:bcp:47"
-                code: "$.語言.代碼"
-                display: "$.語言.名稱"
+      # 🚨 緊急聯絡人 可刪
+      # contact:
+      #   - relationship:
+      #     - coding:
+      #       - system: "http://terminology.hl7.org/CodeSystem/v2-0131"
+      #         code: "$.緊急聯絡人.關係"        
+      #     name:
+      #       use: "official"
+      #       text: "$.緊急聯絡人.姓名"
+      #       family: "$.緊急聯絡人.姓"
+      #       given: "$.緊急聯絡人.名"
+      #     telecom:
+      #       - system: "$.緊急聯絡人.聯絡方式.系統"
+      #         value: "$.緊急聯絡人.聯絡方式.值"
+      #         use: "$.緊急聯絡人.聯絡方式.用途"
+      #     address:
+      #       use: "home"
+      #       type: "both"
+      #       country: "$.緊急聯絡人.地址.國家"
+      #       line: "$.緊急聯絡人.地址.詳細"
+      #       city: "$.緊急聯絡人.地址.縣市"
+      #       district: "$.緊急聯絡人.地址.鄉鎮區"   # TW Core 必填
+      #       postalCode: "$.緊急聯絡人.地址.郵遞區號"
+      #     gender: "$.緊急聯絡人.性別"
+      #     organization: "$.緊急聯絡人.所屬單位"
+ # 🗣️ 語言與溝通偏好 可刪
+      # communication:
+      #   - language:
+      #       coding:
+      #         - system: "urn:ietf:bcp:47"
+      #           code: "$.語言.代碼"
+      #           display: "$.語言.名稱"
 
       # 🏥 管理機構. 確認
       managingOrganization:
         reference: "Organization/$.所屬機構.id"
         display: "$.所屬機構.名稱"
 
-      # 🖼️ 照片
-      photo:
-        - contentType: "$.照片.格式"
-          url: "$.照片.url"
-          title: "$.照片.說明"
-          creation: "$.照片.建立日期"
-
+      # 🖼️ 照片 可刪
+      # photo:
+      #   - contentType: "$.照片.格式"
+      #     url: "$.照片.url"
+      #     title: "$.照片.說明"
+      #     creation: "$.照片.建立日期"
+        # generalPractitioner 追加
   # AllergyIntolerance 來源也指向陣列
   - source: "$.病患清單[*].過敏清單[*]"
     make: "AllergyIntolerance"
@@ -100,13 +101,14 @@ type_router:
         coding:
           - system: "http://terminology.hl7.org/CodeSystem/allergyintolerance-clinical"
             code: "$.臨床狀態"
-        text: "$.臨床狀態"
+        text: "$.中文臨床狀態"
       type: "$.類型"
       code:
         coding:
           - system: "http://snomed.info/sct"
             code: "$.過敏原.代碼"
             display: "$.過敏原.名稱"
+        text: "$.過敏原.中文名稱"
       # 直接從 JSON 中預先準備好的欄位取值
       patient:
         reference: "$.關聯病患.reference"
@@ -118,11 +120,51 @@ type_router:
                 - system: "http://snomed.info/sct"
                   code: "$.過敏反應.症狀.代碼"
                   display: "$.過敏反應.症狀.名稱"
-              text: "$.過敏反應.症狀.名稱"
+              text: "$.過敏反應.症狀.中文名稱"
           severity: "$.過敏反應.嚴重程度"
+
+
+  - source: "$.病患清單[*].病情清單[*]"
+    make: "Condition"
+    fields:
+      # 患者
+      subject:
+        reference: "Patient/$.病患.id"
+        display: "$.病患.姓名"
+
+      # 病情/問題/診斷識別（必填）
+      code:
+        coding:
+          - system: "http://snomed.info/sct"  # 或其他你資料對應的系統
+            code: "$.代碼"
+            display: "$.名稱"
+        text: "$.中文名稱"
+      # 臨床狀態（非必填）
+      clinicalStatus:
+        coding:
+          - system: "http://terminology.hl7.org/CodeSystem/condition-clinical"
+            code: "$.臨床狀態"
+        text: "$.中文臨床狀態"
+
+      # 類別（非必填）
+      category:
+        - coding:
+            - system: "http://terminology.hl7.org/CodeSystem/condition-category"
+              code: "$.類別"
+              display: "$.類別名稱"
+          text: "$.中文類別名稱"
+      # 嚴重程度（非必填）
+      severity:
+        coding:
+          - system: "http://snomed.info/sct"
+            code: "$.嚴重程度代碼"
+            display: "$.嚴重程度名稱"
+        text: "$.中文嚴重程度名稱"
+      # 發病時間（非必填）
+      onsetDateTime: "$.發病時間"
 
 # --- 輸出分組 ---
 output_groups:
   - name: "IPS"
     filename: "IPS.flash"
-    resources: ["Patient", "AllergyIntolerance"]
+    resources: ["Patient", "AllergyIntolerance","Condition"]

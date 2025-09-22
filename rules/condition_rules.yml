@@ -1,0 +1,52 @@
+# --- IG 設定（參考 IPS Condition） ---
+ig:
+  profiles:
+    patient: "https://twcore.mohw.gov.tw/ig/twcore/StructureDefinition/Patient-twcore"
+    condition: "http://hl7.org/fhir/uv/ips/StructureDefinition/Condition-uv-ips"
+
+# --- 來源路由（把原始資料哪一段 → Condition） ---
+type_router:
+  - source: "$.病患清單[*].病情清單[*]"
+    make: "Condition"
+    fields:
+      # 患者
+      subject:
+        reference: "Patient/$.病患.id"
+        display: "$.病患.姓名"
+
+      # 病情/問題/診斷識別（必填）
+      code:
+        coding:
+          - system: "http://snomed.info/sct"  # 或其他你資料對應的系統
+            code: "$.代碼"
+            display: "$.名稱"
+        text: "$.中文名稱"
+      # 臨床狀態（非必填）
+      clinicalStatus:
+        coding:
+          - system: "http://terminology.hl7.org/CodeSystem/condition-clinical"
+            code: "$.臨床狀態"
+        text: "$.中文臨床狀態"
+
+      # 類別（非必填）
+      category:
+        - coding:
+            - system: "http://terminology.hl7.org/CodeSystem/condition-category"
+              code: "$.類別"
+              display: "$.類別名稱"
+          text: "$.中文類別名稱"
+      # 嚴重程度（非必填）
+      severity:
+        coding:
+          - system: "http://snomed.info/sct"
+            code: "$.嚴重程度代碼"
+            display: "$.嚴重程度名稱"
+        text: "$.中文嚴重程度名稱"
+      # 發病時間（非必填）
+      onsetDateTime: "$.發病時間"
+
+# --- 輸出分組 ---
+output_groups:
+  - name: "病情資源"
+    filename: "condition.flash"
+    resources: ["Condition"]
