@@ -1,18 +1,64 @@
 # --- IG 設定 ---
 ig:
   profiles:
-
+   # composition: "http://hl7.org/fhir/uv/ips/StructureDefinition/Composition-uv-ips"
     patient: "http://hl7.org/fhir/uv/ips/StructureDefinition/Patient-uv-ips"
-    #patient: "http://hl7.org/fhir/uv/ips/StructureDefinition/Patient-ips"
-    #allergyintolerance: "http://hl7.org/fhir/StructureDefinition/AllergyIntolerance"
     allergyintolerance: "http://hl7.org/fhir/uv/ips/StructureDefinition/AllergyIntolerance-uv-ips"
     condition: "http://hl7.org/fhir/uv/ips/StructureDefinition/Condition-uv-ips"
+    immunization: "http://hl7.org/fhir/uv/ips/StructureDefinition/Immunization-uv-ips"
+    observation: "http://hl7.org/fhir/StructureDefinition/vitalsigns"
+    #http://hl7.org/fhir/uv/ips/StructureDefinition/Composition-uv-ips
+bundle:
+  type: "transaction "  # collection | transaction | document | message
+  identifier:
+    system: "urn:uuid:0f9ea8c1-0a96-4f4f-85f0-b109ee8c7011"
+    value: "auto"  # 自動生成 UUID
+  meta:
+    profile:
+      - "http://hl7.org/fhir/uv/ips/StructureDefinition/Bundle-uv-ips"
 # --- 來源路由 ---
 type_router:
-  # Patient 來源現在指向陣列，工具可以正常處理了
+ # - source: "$.病患清單[*]"
+    #make: "Composition"
+    #fields:
+      # Composition 資源本身的 ID
+     # id: "$.文件資訊.id"
+      
+      # 文件狀態 (IPS 要求 final)
+     # status: "final"
+
+      # 文件類型 (IPS 固定使用 LOINC code '60591-5')
+      #type:
+      #  coding:
+      #    - system: "http://loinc.org"
+      #      code: "60591-5"
+      #      display: "Patient summary document"
+      
+      # 文件主體 (是關於哪位病患的)
+    #  subject:
+    #    reference: "$.關聯病患.reference"
+    #    display: "$.關聯病患.名稱"
+      
+      # 文件建立日期
+    #  date: "$.文件資訊.文件日期"
+      
+      # 文件作者 (通常是醫師或機構)
+    #  author:
+    #    - reference: "$.醫師.reference"
+    #      display: "$.醫師.名稱"
+          
+      # 文件標題
+     # title: "International Patient Summary"
+      
+      # --- Section (章節) 的對應 ---
+      # 這是 Composition 的核心，用來組織文件內容
+    #section: "$.compositionSection"
+
+
   - source: "$.病患清單[*]"
     make: "Patient"
     fields:
+      id: "$.id"
       identifier:
         - system: "urn:oid:1.2.886.4.6.1.1.999"
           value: "$.身分證號"
@@ -49,30 +95,35 @@ type_router:
       #deceasedDateTime: "$.死亡日期"
 
       # 🚨 緊急聯絡人 可刪
-      # contact:
-      #   - relationship:
-      #     - coding:
-      #       - system: "http://terminology.hl7.org/CodeSystem/v2-0131"
-      #         code: "$.緊急聯絡人.關係"        
-      #     name:
-      #       use: "official"
-      #       text: "$.緊急聯絡人.姓名"
-      #       family: "$.緊急聯絡人.姓"
-      #       given: "$.緊急聯絡人.名"
-      #     telecom:
-      #       - system: "$.緊急聯絡人.聯絡方式.系統"
-      #         value: "$.緊急聯絡人.聯絡方式.值"
-      #         use: "$.緊急聯絡人.聯絡方式.用途"
-      #     address:
-      #       use: "home"
-      #       type: "both"
-      #       country: "$.緊急聯絡人.地址.國家"
-      #       line: "$.緊急聯絡人.地址.詳細"
-      #       city: "$.緊急聯絡人.地址.縣市"
-      #       district: "$.緊急聯絡人.地址.鄉鎮區"   # TW Core 必填
-      #       postalCode: "$.緊急聯絡人.地址.郵遞區號"
-      #     gender: "$.緊急聯絡人.性別"
-      #     organization: "$.緊急聯絡人.所屬單位"
+      contact:
+        - relationship:
+            - coding:
+                - system: "http://terminology.hl7.org/CodeSystem/v2-0131"
+                  code: "$.緊急聯絡人.關係"
+                  display: "Next of Kin" 
+                 
+          name:
+            use: "official"
+            text: "黃大姐"
+            family: "黃"
+            given: "大姐"
+          telecom:
+            - system: "phone"
+              value: "0987654321"
+              use: "home"
+          address:
+            use: "home"
+            type: "both"
+            country: "$.緊急聯絡人.地址.國家"
+            line:
+              - "$.緊急聯絡人.地址.詳細"
+            city: "$.緊急聯絡人.地址.縣市"
+            district: "$.緊急聯絡人.地址.鄉鎮區"
+            postalCode: "$.緊急聯絡人.地址.郵遞區號"
+          gender: "$.緊急聯絡人.性別"
+          organization:
+            display: "$.緊急聯絡人.所屬單位"
+
  # 🗣️ 語言與溝通偏好 可刪
       # communication:
       #   - language:
@@ -83,8 +134,11 @@ type_router:
 
       # 🏥 管理機構. 確認
       managingOrganization:
-        reference: "Organization/$.所屬機構.id"
+        reference: "$.所屬機構.reference"
         display: "$.所屬機構.名稱"
+      generalPractitioner:
+        - reference: "$.醫師.reference"
+          display: "$.醫師.名稱"
 
       # 🖼️ 照片 可刪
       # photo:
@@ -97,11 +151,13 @@ type_router:
   - source: "$.病患清單[*].過敏清單[*]"
     make: "AllergyIntolerance"
     fields:
+      id: "$.id"
       clinicalStatus:
         coding:
           - system: "http://terminology.hl7.org/CodeSystem/allergyintolerance-clinical"
-            code: "$.臨床狀態"
-        text: "$.中文臨床狀態"
+            code: "$.臨床狀態.代碼"
+            display: "$.臨床狀態.名稱"
+        text: "$.臨床狀態.中文名稱"
       type: "$.類型"
       code:
         coding:
@@ -112,7 +168,7 @@ type_router:
       # 直接從 JSON 中預先準備好的欄位取值
       patient:
         reference: "$.關聯病患.reference"
-        display: "$.關聯病患.display"
+        display: "$.關聯病患.名稱"
       onsetDateTime: "$.發生時間"
       reaction:
         - manifestation:
@@ -124,15 +180,21 @@ type_router:
           severity: "$.過敏反應.嚴重程度"
 
 
-  - source: "$.病患清單[*].病情清單[*]"
+  - source: "$.病患清單[*].病況清單[*]"
     make: "Condition"
     fields:
       # 患者
+      id: "$.id"
       subject:
-        reference: "Patient/$.病患.id"
-        display: "$.病患.姓名"
-
-      # 病情/問題/診斷識別（必填）
+        reference: "$.關聯病患.reference"
+        display: "$.關聯病患.名稱"
+      clinicalStatus:
+        coding:
+          - system: "http://terminology.hl7.org/CodeSystem/condition-clinical"
+            code: "$.臨床狀態.代碼"
+            display: "$.臨床狀態.名稱"
+        text: "$.臨床狀態.中文名稱"
+      # 病況/問題/診斷識別（必填）
       code:
         coding:
           - system: "http://snomed.info/sct"  # 或其他你資料對應的系統
@@ -140,13 +202,8 @@ type_router:
             display: "$.名稱"
         text: "$.中文名稱"
       # 臨床狀態（非必填）
-      clinicalStatus:
-        coding:
-          - system: "http://terminology.hl7.org/CodeSystem/condition-clinical"
-            code: "$.臨床狀態"
-        text: "$.中文臨床狀態"
 
-      # 類別（非必填）
+      # 類別（必填）
       category:
         - coding:
             - system: "http://terminology.hl7.org/CodeSystem/condition-category"
@@ -162,9 +219,97 @@ type_router:
         text: "$.中文嚴重程度名稱"
       # 發病時間（非必填）
       onsetDateTime: "$.發病時間"
+  # ... (Condition 規則的結尾)
 
+  # 💉 預防接種資料. category會自動加 
+ 
+  # 💉 預防接種資料 劑次要補
+  - source: "$.病患清單[*].預防接種清單[*]"
+    make: "Immunization"
+    fields:
+      # 接種狀態 (必填)。
+      status: "$.接種狀態"
+      id: "$.id"
+      # 疫苗代碼 (必填)
+      vaccineCode:
+        coding:
+          - system: "$.疫苗代碼.系統"
+            code: "$.疫苗代碼.代碼"
+            display: "$.疫苗代碼.英文名稱"
+        text: "$.疫苗代碼.中文名稱"
+        
+      # 病人 (必填)
+      patient:
+        reference: "$.關聯病患.reference"
+
+      # 接種日期 (必填)
+      occurrenceDateTime: "$.接種日期"
+  - source: "$.病患清單[*].生命徵象清單.一般項目[*]"
+    make: "Observation"
+    fields:
+      id: "$.id"
+      status: "$.狀態"
+      code:
+        coding:
+          - system: "http://loinc.org"
+            code: "$.測量項目.代碼"
+            display: "$.測量項目.名稱"
+      subject:
+        reference: "$.關聯病患.reference"
+      effectiveDateTime: "$.測量時間"
+      valueQuantity:
+        value: "$.測量結果.值"
+        unit: "$.測量結果.單位"
+        code: "$.測量結果.單位代碼"
+        system: "http://unitsofmeasure.org"
+ # - source: "$.病患清單[*].生命徵象清單.血壓[*]"
+  #  make: "Observation"
+   # fields:
+     # id: "$.id"
+    #  status: "$.狀態"
+
+     # code:
+      #  coding:
+       #   - system: "http://loinc.org"
+        #    code: "85354-9"
+         #   display: "Blood pressure panel with all children optional"
+      #subject:
+       # reference: "$.關聯病患.reference"
+        #display: "$.關聯病患.名稱"
+      #effectiveDateTime: "$.測量時間"
+      
+      #component:
+       # - code:
+       #     coding:
+       #       - system: "http://loinc.org"
+       #         code: "8480-6"
+       #         display: "Systolic blood pressure"
+       #   valueQuantity:
+       #     system: "http://unitsofmeasure.org"
+       #     value: "$.收縮壓"
+       ##     unit: "mmHg"
+       #     code: "mm[Hg]"
+
+       # - code:
+       #     coding:
+       #       - system: "http://loinc.org"
+       #         code: "8462-4"
+       #         display: "Diastolic blood pressure"
+       #   valueQuantity:
+       #     system: "http://unitsofmeasure.org"
+       #     value: "$.舒張壓"
+       #     unit: "mmHg"
+       #     code: "mm[Hg]"
+
+
+    
+
+
+
+
+        
 # --- 輸出分組 ---
 output_groups:
   - name: "IPS"
     filename: "IPS.flash"
-    resources: ["Patient", "AllergyIntolerance","Condition"]
+    resources: ["Patient", "AllergyIntolerance", "Condition", "Immunization","Observation"]

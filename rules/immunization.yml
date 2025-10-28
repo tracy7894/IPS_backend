@@ -8,11 +8,11 @@ ig:
     immunization: "http://hl7.org/fhir/uv/ips/StructureDefinition/Immunization-uv-ips"
   # ... (Condition 規則的結尾)
 type_router:
-  # 💉 預防接種資料
-  - source: "$.預防接種清單[*]"
+  # 💉 預防接種資料 劑次要補
+  - source: "$.病患清單[*].預防接種清單[*]"
     make: "Immunization"
     fields:
-      # 接種狀態 (必填)
+      # 接種狀態 (必填)。
       status: "$.接種狀態"
 
       # 疫苗代碼 (必填)

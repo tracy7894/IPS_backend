@@ -3,6 +3,7 @@ const PORT = process.env.PORT || 8000;
 
 const server = app.listen(PORT, () => {
   console.log(`伺服器已啟動：http://localhost:${PORT}`);
+  console.log(`✅ Allowed origin: ${process.env.CLIENT_ORIGIN}`);
 });
 
 server.on('error', (error) => {

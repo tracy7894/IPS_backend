@@ -2,7 +2,10 @@ const IPSService = require('../services/IPS.service');
 
 exports.convertIPS = async (req, res) => {
   try {
+     console.log(">>> 即將呼叫 ipsService.convertIPS...");
     const result = await IPSService.convertIPS(req.body);
+   console.log("<<< ipsService.convertIPS 執行完畢。");
+
     res.status(200).json({
       message: '成功轉換 IPS 資料！',
       converterResponse: result

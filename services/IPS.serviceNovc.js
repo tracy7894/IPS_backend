@@ -5,7 +5,7 @@
 const { v4: uuidv4 } = require('uuid');
 const { sendToConverter } = require('./converter.service'); // 引入帶輪詢的版本
 const { loadRule } = require('../utils/fileLoader');
-const { mapFhirBundleToVC, sendVCToIssuer } = require('./vc.service');
+
 // --- 輔助函式：建立 Composition Section 的 Entry 列表 ---
 const createEntries = (list) => {
   if (!list || list.length === 0) {
@@ -146,7 +146,7 @@ exports.convertIPS = async (rawDataFromFrontend) => {
    console.log("Composition 已插入 Bundle。");
 
   // --- 9. 修正 Bundle Metadata ---
-
+   baseBundle.type = "document";
    const systemUuid = "urn:uuid:0f9ea8c1-0a96-4f4f-85f0-b109ee8c7011"; // 您的系統 UUID
    baseBundle.identifier = {
       system: systemUuid,
@@ -159,48 +159,7 @@ exports.convertIPS = async (rawDataFromFrontend) => {
 
   // --- 10. 回傳結果 ---
   console.log("IPS Bundle 轉換成功！");
-  // return baseBundle;
-  const finalBundle = baseBundle; // 使用我們最終修正好的 Bundle
-    console.log("Bundle Metadata 已修正。");
-    console.log("--- Bundle Before Mapping to VC ---");
-   console.log(JSON.stringify(finalBundle, null, 2));
-
-    // --- **** 10. 將 FHIR Bundle 映射為 VC JSON **** ---
-    let vcJsonPayload;
-    try {
-      console.log(">>> Calling mapFhirBundleToVC...");
-        vcJsonPayload = mapFhirBundleToVC(finalBundle);
-        console.log("<<< mapFhirBundleToVC returned:", JSON.stringify(vcJsonPayload, null, 2)); // <<<< 檢查返回值！
-        //   vcJsonPayload = mapFhirBundleToVC(finalBundle);
-        if (!vcJsonPayload) {
-            throw new Error("Failed to map FHIR Bundle to VC JSON.");
-        }
-    } catch (mappingError) {
-        console.error("映射到 VC JSON 時發生錯誤:", mappingError);
-        // 根據您的需求決定是否要終止流程
-        throw new Error("Error during FHIR to VC mapping.");
-    }
-
-
-    // --- **** 11. 將 VC JSON 發送到發行伺服器 **** ---
-    let vcIssuerResponse;
-    try {
-        vcIssuerResponse = await sendVCToIssuer(vcJsonPayload);
-        console.log("成功發送 VC 資料到發行伺服器。");
-    } catch (sendVcError) {
-        console.error("發送 VC 資料時發生錯誤:", sendVcError);
-        // 根據您的需求決定是否要終止流程
-        throw new Error("Failed to send VC data to issuer.");
-    }
-
-    // --- 12. 回傳結果 ---
-    // 您可以選擇回傳原始的 FHIR Bundle，或者 VC 發行伺服器的回應
-    console.log("IPS 處理及 VC 發送完成。");
-    console.log("--- VC Issuer Response ---");
-  //  console.log(JSON.stringify(vcIssuerResponse, null, 2));
-   //  console.log(JSON.stringify(finalBundle, null, 2));
-    // return finalBundle; // 回傳 FHIR Bundle
-    return vcIssuerResponse; // 回傳 VC 發行伺服器的回應 ！！！！！！！todo:只回傳qrcode路徑
+  return baseBundle;
 };
 
 // --- **** 請確保 createIPSComposition 函式也包含在同一個檔案或被正確引入 **** ---
