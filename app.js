@@ -22,5 +22,7 @@ app.use('/allergy', allergyRoutes);
 app.use('/IPS',IPSRoutes)
 app.use('/condition',conditionRoutes)
 app.use('/fhir',fhirRoutes)
+const oidvpRoutes = require('./routes/oidvp.route.js');
+app.use('/api/oidvp', oidvpRoutes);
 //app.use('/vc',vcRoutes)
 module.exports = app;

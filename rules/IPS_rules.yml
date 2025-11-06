@@ -237,7 +237,7 @@ type_router:
             code: "$.疫苗代碼.代碼"
             display: "$.疫苗代碼.英文名稱"
         text: "$.疫苗代碼.中文名稱"
-        
+      dose: "$.劑次"
       # 病人 (必填)
       patient:
         reference: "$.關聯病患.reference"
