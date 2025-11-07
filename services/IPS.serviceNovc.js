@@ -245,15 +245,7 @@ function createIPSComposition(patientData) {
     ] //.filter(...)
   };
 
-  // --- **** 移除清理空 entry 的 forEach 迴圈 **** ---
-  // (因為現在 entry 可能是必要的空陣列 [])
-  // composition.section.forEach(sec => {
-  //   if (sec.entry && sec.entry.length === 0) {
-  //     delete sec.entry; // <<<< 移除這段邏輯
-  //   }
-  //   // ... (保留確保 text 存在的邏輯) ...
-  // });
-  
+
    if (!composition.subject) { delete composition.subject; }
 
   console.log("--- Manually Created Composition (Revised) ---");

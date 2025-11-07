@@ -103,8 +103,11 @@ exports.getVPResult = async (transactionId) => {
     // 4. 回傳成功的結果 (狀態 200)
     // 這是使用者已上傳資料的狀況
     console.log('成功取得 VP 驗證結果 (200)。');
-    return { status: response.status, data: response.data };
 
+ console.log("vp return json", JSON.stringify(response.data , null, 2));
+
+    return { status: response.status, data: response.data };
+     
   } catch (error) {
     console.warn('呼叫 VC 驗證結果 API 時發生錯誤 (可能為 400 Not Ready)：');
     if (error.response) {
@@ -112,6 +115,7 @@ exports.getVPResult = async (transactionId) => {
       // 外部 API 回傳 400 (尚未上傳) 或 500 (系統錯誤)
       // 這對我們的後端來說是「可預期的錯誤」，我們要把這個狀態回傳給前端
       console.warn(`API 回應狀態: ${error.response.status}`);
+
       return { status: error.response.status, data: error.response.data };
     } else {
       // 這是非預期的錯誤 (例如網路中斷、DNS 查不到)
